@@ -1,3 +1,4 @@
+import { type } from "os";
 import * as consts from "./consts";
 import { ModuleOpt, Type } from "./interfaces";
 
@@ -12,30 +13,47 @@ export class BaseModule {
   }
 }
 
-type ModFnMap<TInput> = Map<Type<TInput>, unknown>;
+type ModFnMap<T> = Map<Type<T>, T>;
 
-function loop<TInput>(ctrs: Type[], modMap: ModFnMap<TInput>) {
+function loop<T>(ctrs: Set<Type<T>>, modMap: ModFnMap<T>): boolean {
+  let op = false;
   for (const ctr of ctrs) {
+    if (modMap.get(ctr)) continue; // 已经实例化
     const types: [] = Reflect.getMetadata(consts.design.paramtypes, ctr);
+
     if (!types) {
+      // 无依赖
       modMap.set(ctr, new ctr());
+      op = true;
       continue;
     }
-
-    const params = types.map((e) => modMap.get(e)).filter((e) => e);
+    console.log(ctr, types);
+    let params = types.map((e) => modMap.get(e)).filter((e) => e);
     if (types.length === params.length) {
+      // 参数已经实例化
       modMap.set(ctr, Reflect.construct(ctr, params));
+      op = true;
     } else {
-      // [todo] 等下轮
+      op = loop(new Set(types), modMap);
+      params = types.map((e) => modMap.get(e)).filter((e) => e);
+      if (types.length !== params.length) {
+        throw new Error(`[class ${ctr.name}] types: ${types}`);
+      }
+      modMap.set(ctr, Reflect.construct(ctr, params));
     }
   }
+  return op;
 }
 
-function setProperty<TInput>(modMap: ModFnMap<TInput>) {
+/**
+ * 构造完成后将属性注入
+ * @param modMap
+ */
+function setProperty<T>(modMap: ModFnMap<T>) {
   for (const [ctr, inst] of modMap) {
     const pkeys = Reflect.getMetadataKeys(ctr.prototype) || [];
     for (const pk of pkeys) {
-      const pAttr = Reflect.getMetadata(pk, ctr.prototype);
+      const pAttr: { key: string } = Reflect.getMetadata(pk, ctr.prototype);
       const ptype = Reflect.getMetadata(
         consts.design.type,
         ctr.prototype,
@@ -52,17 +70,23 @@ export class ModuleFactory {
     const moe: any = new BaseModule();
     const modMap = new Map<Type<TInput>, any>();
 
+    const ends = new Set<Type<TInput>>();
+
     for (const ctr of modOPt.controllers) {
       const params: [] = Reflect.getMetadata(consts.design.paramtypes, ctr);
-      if (params) {
-        loop(params, modMap);
-        modMap.set(ctr, new ctr(...params.map((e) => modMap.get(e))));
+      if (!params) throw new Error(`[class ${ctr.name}] miss @Provider`);
+      if (params.length) {
+        // 有依赖 等轮
+        ends.add(ctr);
       } else {
+        // controller 本身是无依赖的情况
         modMap.set(ctr, new ctr());
       }
     }
 
+    loop(ends, modMap);
     setProperty(modMap);
+
     Object.assign(moe, { modMap });
     return moe;
   }
