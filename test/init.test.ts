@@ -1,5 +1,4 @@
-import { Provider, Module, BaseModule, ModuleFactory } from "../index";
-import { Inject } from "../src/decorators";
+import { Inject, Provider, Module, BaseModule, ModuleFactory } from "../index";
 
 @Provider()
 class Acl {
@@ -40,11 +39,10 @@ class AppModule extends BaseModule {}
 
 function main() {
   const app = ModuleFactory.create(AppModule);
-  console.log(app.all())
+  console.log(app.all());
   const ct = app.get(Ccl);
   ct.hello();
-  ct.b1.hello()
+  ct.b1.hello();
 }
-
 
 process.nextTick(main);

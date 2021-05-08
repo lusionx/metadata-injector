@@ -1,4 +1,3 @@
-import { type } from "os";
 import * as consts from "./consts";
 import { ModuleOpt, Type } from "./interfaces";
 
@@ -15,11 +14,11 @@ export class BaseModule {
 
 type ModFnMap<T> = Map<Type<T>, T>;
 
-function loop<T>(ctrs: Set<Type<T>>, modMap: ModFnMap<T>): boolean {
+function rCreate<T>(ctrs: Set<Type<T>>, modMap: ModFnMap<T>): boolean {
   let op = false;
   for (const ctr of ctrs) {
     if (modMap.get(ctr)) continue; // 已经实例化
-    const types: [] = Reflect.getMetadata(consts.design.paramtypes, ctr);
+    const types: Type<T>[] = Reflect.getMetadata(consts.design.paramtypes, ctr);
 
     if (!types) {
       // 无依赖
@@ -27,17 +26,20 @@ function loop<T>(ctrs: Set<Type<T>>, modMap: ModFnMap<T>): boolean {
       op = true;
       continue;
     }
-    console.log(ctr, types);
+
     let params = types.map((e) => modMap.get(e)).filter((e) => e);
     if (types.length === params.length) {
       // 参数已经实例化
       modMap.set(ctr, Reflect.construct(ctr, params));
       op = true;
     } else {
-      op = loop(new Set(types), modMap);
+      op = rCreate(new Set(types), modMap);
       params = types.map((e) => modMap.get(e)).filter((e) => e);
       if (types.length !== params.length) {
-        throw new Error(`[class ${ctr.name}] types: ${types}`);
+        const names = types.map((e) => e.name).join("/");
+        throw new Error(
+          `[class ${ctr.name}] types: [class ${names}] has ${params}`
+        );
       }
       modMap.set(ctr, Reflect.construct(ctr, params));
     }
@@ -49,7 +51,7 @@ function loop<T>(ctrs: Set<Type<T>>, modMap: ModFnMap<T>): boolean {
  * 构造完成后将属性注入
  * @param modMap
  */
-function setProperty<T>(modMap: ModFnMap<T>) {
+function injectProperty<T>(modMap: ModFnMap<T>) {
   for (const [ctr, inst] of modMap) {
     const pkeys = Reflect.getMetadataKeys(ctr.prototype) || [];
     for (const pk of pkeys) {
@@ -84,8 +86,8 @@ export class ModuleFactory {
       }
     }
 
-    loop(ends, modMap);
-    setProperty(modMap);
+    rCreate(ends, modMap);
+    injectProperty(modMap);
 
     Object.assign(moe, { modMap });
     return moe;
