@@ -1,4 +1,5 @@
 import { Provider, Module, BaseModule, ModuleFactory } from "../index";
+import { Inject } from "../src/decorators";
 
 @Provider()
 class Acl {
@@ -19,21 +20,31 @@ class Bcl {
 @Provider()
 class Ccl {
   constructor(public ac: Acl) {}
+
+  @Inject()
+  b1!: Bcl;
+
+  @Inject()
+  b2!: Bcl;
+
   hello() {
     this.ac.say();
-    console.log("hello Bcl");
+    console.log("hello Ccl");
   }
 }
 
 @Module({
-  controllers: [Bcl],
+  controllers: [Ccl, Bcl],
 })
 class AppModule extends BaseModule {}
 
 function main() {
   const app = ModuleFactory.create(AppModule);
-  const ct = app.get(Bcl);
+  console.log(app.all())
+  const ct = app.get(Ccl);
   ct.hello();
+  ct.b1.hello()
 }
+
 
 process.nextTick(main);

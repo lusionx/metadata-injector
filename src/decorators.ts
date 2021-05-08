@@ -6,18 +6,14 @@ import "reflect-metadata";
 
 export function Provider(options?: { id?: string }): ClassDecorator {
   return (target) => {
-    Reflect.defineMetadata(consts.mate.svc, options, target);
+    Reflect.defineMetadata(consts.meta.svc, options, target);
   };
 }
 
-export function Inject(id: string): ParameterDecorator {
-  return (target: Object, key: string | symbol, index: number) => {
-    Reflect.defineMetadata(
-      util.format(consts.mate.par, index),
-      { id },
-      target.constructor,
-      key
-    );
+export function Inject(id?: string): PropertyDecorator {
+  return (target: Object, key: string | symbol) => {
+    const k = util.format(consts.meta.property, key);
+    Reflect.defineMetadata(k, { id, key }, target);
   };
 }
 
@@ -27,6 +23,6 @@ interface ModuleOpt {
 
 export function Module(options: ModuleOpt): ClassDecorator {
   return (mod) => {
-    Reflect.defineMetadata(consts.mate.ctx, options, mod);
+    Reflect.defineMetadata(consts.meta.ctx, options, mod);
   };
 }
