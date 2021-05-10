@@ -2,7 +2,7 @@ import * as consts from "./consts";
 import { ModuleOpt, Type } from "./interfaces";
 
 export class BaseModule {
-  private modMap!: Map<any, any>;
+  private modMap!: ModFnMap<any>;
   get<TInput = any, TResult = TInput>(svc: Type<TInput>): TResult {
     return this.modMap.get(svc);
   }

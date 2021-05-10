@@ -12,17 +12,19 @@ metadata-injector
 ```js
 Reflect.defineMetadata(k, v, target);
 Reflect.getMetadata(k, target);
+Reflect.getMetadata("design:paramtypes", target);
 ```
 
-如果对属性/方法, 则附在 target.prototype 上
+如果对属性, 则附在 target.prototype 上
 ```js
-Reflect.defineMetadata(k, v, target.prototype);
+Reflect.defineMetadata(k, v, target); // tagget 是 prototype
 Reflect.getMetadata(k, target.prototype, protoKey);
+Reflect.getMetadata("design:type", target.prototype, protoKey);
 ```
 
-`k`完全自定义, 但有如下约定的值,
-- design:paramtypes 参数类型
-- design:type 属性类型
+`k`完全自定义, 但有如下约定的值本 ts 利用,
+- design:paramtypes 参数类型 [type]
+- design:type 属性类型 `type`
 
 使用任意装饰器时, ts 会生成对应的 design 值, 不用手动设置
 
