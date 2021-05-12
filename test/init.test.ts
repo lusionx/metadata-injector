@@ -1,48 +1,35 @@
-import { Inject, Provider, Module, BaseModule, ModuleFactory } from "../index";
+import { ModuleFactory } from "../index";
+import { A1Module, A2Module, Bcl, Ccl } from "./mods";
 
-@Provider()
-class Acl {
-  say() {
-    console.log("Acl say");
-  }
-}
+describe("b dep a", () => {
+  it("b of a", () => {
+    const app = ModuleFactory.create(A1Module);
+    const ins = app.get(Bcl);
+    expect(ins).toBeTruthy();
+    expect(ins.ac).toBeTruthy();
+  });
 
-@Provider()
-class Bcl {
-  constructor(protected ac: Acl) {}
-  hello() {
-    this.ac.say();
-    console.log("hello Bcl");
-  }
-}
+  it("call b.a", () => {
+    const app = ModuleFactory.create(A1Module);
+    const ins = app.get(Bcl);
+    expect(ins.ac.say()).toEqual("say");
+  });
+});
 
-@Provider()
-class Ccl {
-  constructor(public ac: Acl) {}
+describe("c deps", () => {
+  it("c of a", () => {
+    const app = ModuleFactory.create(A2Module);
+    const ins = app.get(Ccl);
+    expect(ins).toBeTruthy();
+    expect(ins.ac).toBeTruthy();
+    expect(ins.ac.say()).toEqual("say");
+  });
 
-  @Inject()
-  b1!: Bcl;
-
-  @Inject()
-  b2!: Bcl;
-
-  hello() {
-    this.ac.say();
-    console.log("hello Ccl");
-  }
-}
-
-@Module({
-  controllers: [Ccl, Bcl],
-})
-class AppModule extends BaseModule {}
-
-function main() {
-  const app = ModuleFactory.create(AppModule);
-  console.log(app.all());
-  const ct = app.get(Ccl);
-  ct.hello();
-  ct.b1.hello();
-}
-
-process.nextTick(main);
+  it("c of 2 b", () => {
+    const app = ModuleFactory.create(A2Module);
+    const ins = app.get(Ccl);
+    expect(ins.b1).toBeTruthy();
+    expect(ins.b2).toBeTruthy();
+    expect(ins.hello()).toEqual(["hello", "hello"]);
+  });
+});
