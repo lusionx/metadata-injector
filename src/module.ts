@@ -38,7 +38,7 @@ function rCreate<T>(ctrs: Set<Type<T>>, modMap: ModFnMap<T>): boolean {
       if (types.length !== params.length) {
         const names = types.map((e) => e.name).join("/");
         throw new Error(
-          `[class ${ctr.name}] types: [class ${names}] has ${params}`
+          `[class ${ctr.name}] types: [class ${names}] has ${params}`,
         );
       }
       modMap.set(ctr, Reflect.construct(ctr, params));
@@ -55,13 +55,14 @@ function injectProperty<T>(modMap: ModFnMap<T>) {
   for (const [ctr, inst] of modMap) {
     const pkeys = Reflect.getMetadataKeys(ctr.prototype) || [];
     for (const pk of pkeys) {
-      const pAttr: { key: string } = Reflect.getMetadata(pk, ctr.prototype);
+      type tAttr = { key: string; id?: Type };
+      const pAttr: tAttr = Reflect.getMetadata(pk, ctr.prototype);
       const ptype = Reflect.getMetadata(
         consts.design.type,
         ctr.prototype,
-        pAttr.key
+        pAttr.key,
       );
-      Object.assign(inst, { [pAttr.key]: modMap.get(ptype) });
+      Object.assign(inst, { [pAttr.key]: modMap.get(pAttr.id || ptype) });
     }
   }
 }
@@ -73,7 +74,11 @@ export class ModuleFactory {
     const modMap = new Map<Type<TInput>, any>();
 
     const ends = new Set<Type<TInput>>();
-
+    if (modOPt.tops) {
+      for (const ctr of modOPt.tops) {
+        modMap.set(ctr, new ctr());
+      }
+    }
     for (const ctr of modOPt.controllers) {
       const params: [] = Reflect.getMetadata(consts.design.paramtypes, ctr);
       if (!params) throw new Error(`[class ${ctr.name}] miss @Provider`);

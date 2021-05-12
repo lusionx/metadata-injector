@@ -1,6 +1,6 @@
 import * as consts from "./consts";
 import * as util from "util";
-import { Type } from "./interfaces";
+import { Type, ModuleOpt } from "./interfaces";
 
 import "reflect-metadata";
 
@@ -10,15 +10,11 @@ export function Provider(options?: { id?: string }): ClassDecorator {
   };
 }
 
-export function Inject(id?: string): PropertyDecorator {
+export function Inject(id?: Type): PropertyDecorator {
   return (target: Object, key: string | symbol) => {
     const k = util.format(consts.meta.property, key);
-    Reflect.defineMetadata(k, { id, key }, target);
+    Reflect.defineMetadata(k, { id, key }, target); // target 指向 class.prototype
   };
-}
-
-interface ModuleOpt {
-  controllers: Type[];
 }
 
 export function Module(options: ModuleOpt): ClassDecorator {

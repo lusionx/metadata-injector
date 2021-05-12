@@ -25,7 +25,7 @@ describe("c deps", () => {
     expect(ins.ac.say()).toEqual("say");
   });
 
-  it("c of 2 b", () => {
+  it("c has 2 b", () => {
     const app = ModuleFactory.create(A2Module);
     const ins = app.get(Ccl);
     expect(ins.b1).toBeTruthy();

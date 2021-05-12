@@ -15,6 +15,11 @@ export class Bcl {
   }
 }
 
+@Module({
+  controllers: [Bcl],
+})
+export class A1Module extends BaseModule {}
+
 @Provider()
 export class Ccl {
   constructor(public ac: Acl) {}
@@ -29,11 +34,6 @@ export class Ccl {
     return [this.b1.hello(), this.b2.hello()];
   }
 }
-
-@Module({
-  controllers: [Bcl],
-})
-export class A1Module extends BaseModule {}
 
 @Module({
   controllers: [Ccl, Bcl],
