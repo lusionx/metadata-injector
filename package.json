@@ -7,7 +7,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "tsr": "ts-node",
+    "tsx": "rm -rf ./dist"
   },
   "author": "",
   "license": "ISC",

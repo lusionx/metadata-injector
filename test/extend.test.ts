@@ -1,4 +1,4 @@
-import { Inject, Provider, Module, BaseModule, ModuleFactory } from "../index";
+import { Inject, Provider, Module, SvcModule, ModuleFactory } from "../index";
 
 import { Acl } from "./mods";
 
@@ -25,7 +25,7 @@ export class C2 {
   controllers: [C2],
   tops: [Ah],
 })
-export class A3Module extends BaseModule {}
+export class A3Module extends SvcModule {}
 
 describe("c deps", () => {
   it("c has ah", () => {
@@ -59,7 +59,7 @@ export class Cx {
   controllers: [Cx],
   tops: [Ax],
 })
-export class AxModule extends BaseModule {}
+export class AxModule extends SvcModule {}
 
 describe("c deps err", () => {
   it("ax not Acl", () => {

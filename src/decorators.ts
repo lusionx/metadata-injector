@@ -10,6 +10,12 @@ export function Provider(options?: { id?: string }): ClassDecorator {
   };
 }
 
+/**
+ * 注入属性, 默认情况下请直接使用 new 参数注入
+ * 只有解决循环依赖/子类实现时才使用属性注入
+ * @param id 指向熟悉 type 的子类, 实现替换
+ * @returns
+ */
 export function Inject(id?: Type): PropertyDecorator {
   return (target: Object, key: string | symbol) => {
     const k = util.format(consts.meta.property, key);
@@ -17,6 +23,11 @@ export function Inject(id?: Type): PropertyDecorator {
   };
 }
 
+/**
+ * 依赖树容器
+ * @param options
+ * @returns
+ */
 export function Module(options: ModuleOpt): ClassDecorator {
   return (mod) => {
     Reflect.defineMetadata(consts.meta.ctx, options, mod);

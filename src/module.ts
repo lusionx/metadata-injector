@@ -1,8 +1,8 @@
 import * as consts from "./consts";
 import { strictEqual } from "assert";
-import { ModuleOpt, Type } from "./interfaces";
+import { ModuleOpt, OnModuleInit, Type } from "./interfaces";
 
-export class BaseModule {
+export class SvcModule {
   private modMap!: ModFnMap<any>;
   get<TInput = any, TResult = TInput>(svc: Type<TInput>): TResult {
     return this.modMap.get(svc);
@@ -75,10 +75,18 @@ function injectProperty<T>(modMap: ModFnMap<T>) {
   }
 }
 
+function execInit<T>(modMap: Map<Type<T>, Partial<OnModuleInit>>) {
+  for (const [, inst] of modMap) {
+    if (inst.onModuleInit) {
+      inst.onModuleInit();
+    }
+  }
+}
+
 export class ModuleFactory {
   static create<TInput = any, TRes = TInput>(mod: Type<TInput>): TRes {
     const modOPt: ModuleOpt = Reflect.getMetadata(consts.meta.ctx, mod);
-    const moe: any = new BaseModule();
+    const moe: any = new SvcModule();
     const modMap = new Map<Type<TInput>, any>();
 
     const ends = new Set<Type<TInput>>();
@@ -101,6 +109,7 @@ export class ModuleFactory {
 
     rCreate(ends, modMap);
     injectProperty(modMap);
+    execInit(modMap);
 
     Object.assign(moe, { modMap });
     return moe;

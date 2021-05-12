@@ -7,6 +7,7 @@ describe("b dep a", () => {
     const ins = app.get(Bcl);
     expect(ins).toBeTruthy();
     expect(ins.ac).toBeTruthy();
+    expect(ins.init).toBeTruthy();
   });
 
   it("call b.a", () => {

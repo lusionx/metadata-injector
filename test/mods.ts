@@ -1,4 +1,5 @@
-import { Inject, Provider, Module, BaseModule } from "../index";
+import { Inject, Provider, Module, SvcModule } from "../index";
+import { OnModuleInit } from "../src/interfaces";
 
 @Provider()
 export class Acl {
@@ -8,8 +9,14 @@ export class Acl {
 }
 
 @Provider()
-export class Bcl {
-  constructor(public ac: Acl) {}
+export class Bcl implements OnModuleInit {
+  init: boolean;
+  constructor(public ac: Acl) {
+    this.init = false;
+  }
+  onModuleInit(): void {
+    this.init = true;
+  }
   hello() {
     return "hello";
   }
@@ -18,7 +25,7 @@ export class Bcl {
 @Module({
   controllers: [Bcl],
 })
-export class A1Module extends BaseModule {}
+export class A1Module extends SvcModule {}
 
 @Provider()
 export class Ccl {
@@ -38,4 +45,4 @@ export class Ccl {
 @Module({
   controllers: [Ccl, Bcl],
 })
-export class A2Module extends BaseModule {}
+export class A2Module extends SvcModule {}
