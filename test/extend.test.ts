@@ -28,18 +28,41 @@ export class C2 {
 export class A3Module extends BaseModule {}
 
 describe("c deps", () => {
-  it("c of a", () => {
-    const app = ModuleFactory.create(A3Module);
-    const ins = app.get(C2);
-    expect(ins).toBeTruthy();
-    expect(ins.ac).toBeTruthy();
-    expect(ins.ac.say()).toEqual("say");
-  });
-
   it("c has ah", () => {
     const app = ModuleFactory.create(A3Module);
     const ins = app.get(C2);
     expect(ins.ah).toBeTruthy();
     expect(ins.hello()).toEqual(["say Ah"]);
+  });
+});
+
+@Provider()
+export class Ax {
+  say() {
+    return "say Ah";
+  }
+}
+
+@Provider()
+export class Cx {
+  constructor(public ac: Acl) {}
+
+  @Inject(Ax)
+  ah!: Acl;
+
+  hello() {
+    return [this.ah.say()];
+  }
+}
+
+@Module({
+  controllers: [Cx],
+  tops: [Ax],
+})
+export class AxModule extends BaseModule {}
+
+describe("c deps err", () => {
+  it("ax not Acl", () => {
+    expect(() => ModuleFactory.create(AxModule)).toThrow();
   });
 });

@@ -1,4 +1,5 @@
 import * as consts from "./consts";
+import { strictEqual } from "assert";
 import { ModuleOpt, Type } from "./interfaces";
 
 export class BaseModule {
@@ -62,6 +63,13 @@ function injectProperty<T>(modMap: ModFnMap<T>) {
         ctr.prototype,
         pAttr.key,
       );
+      if (pAttr.id) {
+        strictEqual(
+          pAttr.id.prototype.__proto__,
+          ptype.prototype,
+          `[class ${pAttr.id.name}] not extends [class ${ptype.name}]`,
+        );
+      }
       Object.assign(inst, { [pAttr.key]: modMap.get(pAttr.id || ptype) });
     }
   }
