@@ -8,7 +8,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "tsc": "tsc",
-    "tsr": "ts-node",
+    "ts": "ts-node",
     "tsx": "rm -rf ./dist"
   },
   "author": "",
