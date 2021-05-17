@@ -1,5 +1,5 @@
 import { Inject, Provider, Module, SvcModule } from "../index";
-import { OnModuleInit } from "../src/interfaces";
+import { OnModuleInit } from "../src";
 
 @Provider()
 export class Acl {

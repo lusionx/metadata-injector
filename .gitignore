@@ -3,5 +3,5 @@ node_modules
 dist
 *.log
 package-lock.json
-/dev.ts
+/dev.*
 /index.js

@@ -15,8 +15,9 @@ export class SvcModule {
 
 type ModFnMap<T> = Map<Type<T>, T>;
 
-function rCreate<T>(ctrs: Set<Type<T>>, modMap: ModFnMap<T>): boolean {
+function cLoop<T>(ctrs: Set<Type<T>>, modMap: ModFnMap<T>): boolean {
   let op = false;
+  const nst = new Set<Type<T>>();
   for (const ctr of ctrs) {
     if (modMap.get(ctr)) continue; // 已经实例化
     const types: Type<T>[] = Reflect.getMetadata(consts.design.paramtypes, ctr);
@@ -34,18 +35,40 @@ function rCreate<T>(ctrs: Set<Type<T>>, modMap: ModFnMap<T>): boolean {
       modMap.set(ctr, Reflect.construct(ctr, params));
       op = true;
     } else {
-      op = rCreate(new Set(types), modMap);
-      params = types.map((e) => modMap.get(e)).filter((e) => e);
-      if (types.length !== params.length) {
-        const names = types.map((e) => e.name).join("/");
-        throw new Error(
-          `[class ${ctr.name}] types: [class ${names}] has ${params}`,
-        );
-      }
-      modMap.set(ctr, Reflect.construct(ctr, params));
+      // 参数缺实例
+      types.forEach((e) => nst.add(e));
+      op = true;
     }
   }
+
+  // 填入待 new
+  nst.forEach((e) => ctrs.add(e));
+
   return op;
+}
+
+function rCreate<T>(ctrs: Set<Type<T>>, modMap: ModFnMap<T>): void {
+  let cc = ctrs.size;
+  const ops: boolean[] = [true, true];
+  while (cc) {
+    const op = cLoop(ctrs, modMap);
+    ops.push(op);
+    const [a, b] = ops.slice(-2);
+    if (a === false && b === false) {
+      break;
+    }
+  }
+
+  if (ctrs.size === modMap.size) return;
+  // 遍历完成
+  const ctr = [...ctrs].find((e) => !modMap.get(e));
+  if (ctr) {
+    const types: Type<T>[] = Reflect.getMetadata(consts.design.paramtypes, ctr);
+    const params = types.map((e) => modMap.get(e)).filter((e) => e);
+    const names = types.map((e) => e.name).join("/");
+    const str = `[class ${ctr.name}] types: [class ${names}] has ${params}`;
+    throw new Error(str);
+  }
 }
 
 /**
