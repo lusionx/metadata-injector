@@ -1,13 +1,8 @@
 import * as util from "util";
 
-type log = (key: string, ...args: any[]) => void;
-
 export interface ILogger {
-  trace: log;
-  debug: log;
-  info: log;
-  warn: log;
-  error: log;
+  log(str: string): void;
+  format(key: string, lvl: LogLevel, ss: string): string;
 }
 
 export enum LogLevel {
@@ -23,10 +18,13 @@ export class Logger implements ILogger {
   constructor() {
     this.level = LogLevel.info;
   }
+  log(str: string): void {
+    console.log(str);
+  }
 
   format(key: string, lvl: LogLevel, ss: string) {
-    const now = new Date();
-    const str = `[${now.toISOString()}] [${LogLevel[lvl]}] [${key}] - `;
+    const now = new Date().toISOString();
+    const str = `[${now}] [${LogLevel[lvl].toUpperCase()}] [${key}] - `;
     let color = str;
     switch (lvl) {
       case LogLevel.trace: // B
@@ -52,27 +50,32 @@ export class Logger implements ILogger {
 
   trace(key: string, ...args: any[]) {
     const lv = LogLevel.trace;
-    if (this.level >= lv)
-      console.log(this.format(key, lv, util.format(...args)));
+    if (this.level >= lv) {
+      this.log(this.format(key, lv, util.format(...args)));
+    }
   }
   debug(key: string, ...args: any[]) {
     const lv = LogLevel.debug;
-    if (this.level >= lv)
-      console.log(this.format(key, lv, util.format(...args)));
+    if (this.level >= lv) {
+      this.log(this.format(key, lv, util.format(...args)));
+    }
   }
   info(key: string, ...args: any[]) {
     const lv = LogLevel.info;
-    if (this.level >= lv)
-      console.log(this.format(key, lv, util.format(...args)));
+    if (this.level >= lv) {
+      this.log(this.format(key, lv, util.format(...args)));
+    }
   }
   warn(key: string, ...args: any[]) {
     const lv = LogLevel.warn;
-    if (this.level >= lv)
-      console.log(this.format(key, lv, util.format(...args)));
+    if (this.level >= lv) {
+      this.log(this.format(key, lv, util.format(...args)));
+    }
   }
   error(key: string, ...args: any[]) {
     const lv = LogLevel.error;
-    if (this.level >= lv)
-      console.log(this.format(key, lv, util.format(...args)));
+    if (this.level >= lv) {
+      this.log(this.format(key, lv, util.format(...args)));
+    }
   }
 }
